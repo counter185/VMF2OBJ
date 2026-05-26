@@ -599,52 +599,65 @@ public class VMF2OBJ {
 						File materialOutPath = new File(outPath);
 						materialOutPath = new File(
 								formatPath(materialOutPath.getParent() + File.separator + vpkEntries.get(index).getFullPath()));
-						if (!materialOutPath.exists()) {
-							try {
-								File directory = new File(materialOutPath.getParent());
-								if (!directory.exists()) {
-									directory.mkdirs();
-								}
-							} catch (Exception e) {
-								logger.log(Level.SEVERE, "Failed to create directory: " + materialOutPath.getParent());
-								logger.log(Level.SEVERE, e.toString());
-							}
-							try {
-								vpkEntries.get(index).extract(materialOutPath);
-								String[] command = new String[] {
-									VTFLibPath,
-									"-folder", formatPath(materialOutPath.toString()),
-									"-output", formatPath(materialOutPath.getParent()),
-									"-exportformat", "tga",
-									"-format", "BGR888"};
-
-								if (vmt.translucent == 1 || vmt.alphatest == 1) {
-									command[8] = "BGRA8888"; // Only include alpha channel if it's a transparent texture
-								}
-
-								proc = Runtime.getRuntime().exec(command);
-								BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-								while ((reader.readLine()) != null) {}
-								proc.waitFor();
-								// materialOutPath.delete();
-								materialOutPath = new File(
-									materialOutPath.toString().substring(0, materialOutPath.toString().lastIndexOf('.')) + ".tga");
-
-								int width = 1;
-								int height = 1;
+						if (getTextureIndexByFileName(textures, vmt.basetexture) == -1) {
+							if (job.copyMaterials) {
 								try {
-									byte[] fileContent = Files.readAllBytes(materialOutPath.toPath());
-									width = TargaReader.getWidth(fileContent); 
-									height = TargaReader.getHeight(fileContent);
+									File directory = new File(materialOutPath.getParent());
+									if (!directory.exists()) {
+										directory.mkdirs();
+									}
 								} catch (Exception e) {
-									logger.log(Level.WARNING, "Cant read Material: " + materialOutPath);
-									// logger.log(Level.SEVERE, e);
+									logger.log(Level.SEVERE, "Failed to create directory: " + materialOutPath.getParent());
+									logger.log(Level.SEVERE, e.toString());
 								}
-								// logger.log(Level.FINE, "Adding Material: "+ el);
-								textures.add(new Texture(el, vmt.basetexture, materialOutPath.toString(), width, height));
-							} catch (Exception e) {
-								logger.log(Level.SEVERE, "Failed to extract material: " + vmt.basetexture);
-								logger.log(Level.SEVERE, e.toString());
+								try {
+									vpkEntries.get(index).extract(materialOutPath);
+									String[] command = new String[] {
+										VTFLibPath,
+										"-folder", formatPath(materialOutPath.toString()),
+										"-output", formatPath(materialOutPath.getParent()),
+										"-exportformat", "tga",
+										"-format", "BGR888"};
+
+									if (vmt.translucent == 1 || vmt.alphatest == 1) {
+										command[8] = "BGRA8888"; // Only include alpha channel if it's a transparent texture
+									}
+
+									proc = Runtime.getRuntime().exec(command);
+									BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+									while ((reader.readLine()) != null) {}
+									proc.waitFor();
+									// materialOutPath.delete();
+									materialOutPath = new File(
+										materialOutPath.toString().substring(0, materialOutPath.toString().lastIndexOf('.')) + ".tga");
+
+									int width = 1;
+									int height = 1;
+									try {
+										byte[] fileContent = Files.readAllBytes(materialOutPath.toPath());
+										width = TargaReader.getWidth(fileContent); 
+										height = TargaReader.getHeight(fileContent);
+									} catch (Exception e) {
+										logger.log(Level.WARNING, "Cant read Material: " + materialOutPath);
+										// logger.log(Level.SEVERE, e);
+									}
+									// logger.log(Level.FINE, "Adding Material: "+ el);
+									textures.add(new Texture(el, vmt.basetexture, materialOutPath.toString(), width, height));
+								
+								} catch (Exception e) {
+									logger.log(Level.SEVERE, "Failed to extract material: " + vmt.basetexture);
+									logger.log(Level.SEVERE, e.toString());
+								}
+							} else {
+								try {
+									byte[] vtfFile = vpkEntries.get(index).readData();
+									int width = VTFReader.getWidth(vtfFile);
+									int height = VTFReader.getHeight(vtfFile);
+									textures.add(new Texture(el, vmt.basetexture, materialOutPath.toString(), width, height));
+								} catch (Exception e) {
+									logger.log(Level.SEVERE, "Failed to extract material: " + vmt.basetexture);
+									logger.log(Level.SEVERE, e.toString());
+								}
 							}
 
 							if (vmt.bumpmap != null) { // If the material has a bump map associated with it
@@ -654,7 +667,7 @@ public class VMF2OBJ {
 								// logger.log(Level.FINE, "Bump found on "+vmt.basetexture+": "+vmt.bumpmap);
 								int bumpMapIndex = getEntryIndexByPath(vpkEntries, "materials/" + vmt.bumpmap + ".vtf");
 								// logger.log(Level.FINE, bumpMapIndex);
-								if (bumpMapIndex != -1) {
+								if (job.copyMaterials && bumpMapIndex != -1) {
 									File bumpMapOutPath = new File(outPath);
 									bumpMapOutPath = new File(formatPath(
 											bumpMapOutPath.getParent() + File.separator + vpkEntries.get(bumpMapIndex).getFullPath()));

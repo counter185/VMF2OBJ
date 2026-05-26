@@ -311,6 +311,7 @@ public class VMF2OBJFrame extends javax.swing.JFrame {
 		panelSettings = new javax.swing.JPanel();
 		checkBoxQuietMode = new javax.swing.JCheckBox();
 		checkBoxSkipToolBrushes = new javax.swing.JCheckBox();
+		checkBoxCopyMaterials = new javax.swing.JCheckBox();
 		buttonConvert = new javax.swing.JButton();
 		logScrollPane = new javax.swing.JScrollPane();
 		logTextArea = new javax.swing.JTextArea();
@@ -419,18 +420,29 @@ public class VMF2OBJFrame extends javax.swing.JFrame {
 			}
 		});
 
+		checkBoxCopyMaterials.setText("Copy materials");
+		checkBoxCopyMaterials.setToolTipText("Materials used in the VMF file will be copied to the output directory");
+		checkBoxCopyMaterials.setSelected(job.copyMaterials);
+		checkBoxCopyMaterials.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				checkBoxCopyMaterialsActionPerformed(evt);
+			}
+		});
+
 		javax.swing.GroupLayout panelTexturesLayout = new javax.swing.GroupLayout(panelSettings);
 		panelSettings.setLayout(panelTexturesLayout);
 		panelTexturesLayout
 				.setHorizontalGroup(panelTexturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 						.addGroup(panelTexturesLayout.createSequentialGroup().addContainerGap()
 								.addGroup(panelTexturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addComponent(checkBoxSkipToolBrushes).addComponent(checkBoxQuietMode))));
+										.addComponent(checkBoxSkipToolBrushes).addComponent(checkBoxQuietMode).addComponent(checkBoxCopyMaterials))));
 		panelTexturesLayout
 				.setVerticalGroup(panelTexturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 						.addGroup(panelTexturesLayout.createSequentialGroup().addContainerGap().addComponent(checkBoxQuietMode)
 								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(checkBoxSkipToolBrushes)));
+								.addComponent(checkBoxSkipToolBrushes)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(checkBoxCopyMaterials)));
 
 		tabbedPaneOptions.addTab("Settings", panelSettings);
 
@@ -556,6 +568,10 @@ public class VMF2OBJFrame extends javax.swing.JFrame {
 		job.skipTools = checkBoxSkipToolBrushes.isSelected();
 	}
 
+	private void checkBoxCopyMaterialsActionPerformed(java.awt.event.ActionEvent evt) {
+		job.copyMaterials = checkBoxCopyMaterials.isSelected();
+	}
+
 	private void buttonConvertActionPerformed(java.awt.event.ActionEvent evt) {
 		VMFFileEntry entry = job.file;
 		File vmfFile = saveVmfFileDialog(new File(entry.outPath));
@@ -576,6 +592,7 @@ public class VMF2OBJFrame extends javax.swing.JFrame {
 	private javax.swing.JButton buttonRemoveAll;
 	private javax.swing.JCheckBox checkBoxQuietMode;
 	private javax.swing.JCheckBox checkBoxSkipToolBrushes;
+	private javax.swing.JCheckBox checkBoxCopyMaterials;
 	private javax.swing.JLabel labelDnDTip;
 	private javax.swing.JList<Path> listResources;
 	private javax.swing.JPanel panelFiles;
