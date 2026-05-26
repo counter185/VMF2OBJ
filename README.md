@@ -23,6 +23,7 @@ There is also a Command Line Interface:
 ```
 usage: vmf2obj [VMF_FILE] [args...]
  -h,--help                  Show this message
+ -m,--materials             Don't copy materials to output directory
  -o,--output <arg>          Name of the output files. Defaults to the name
                             of the VMF file
  -q,--quiet                 Suppress warnings
